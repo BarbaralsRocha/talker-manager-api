@@ -19,6 +19,17 @@ routes.get('/talker', async (_, response) => {
     }
 });
 
+routes.get('/talker/:id', async (request, response) => {
+        const { id } = request.params;
+        const talker = await readTalker();
+        const user = talker.find((u) => u.id === +id);
+        if (!user) {
+            console.log('entrou');
+            return response.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+        }
+        return response.status(200).json(user);
+});
+
 routes.use(middlewares.errorHandler);
 
 module.exports = routes;
