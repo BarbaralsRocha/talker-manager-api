@@ -54,6 +54,35 @@ async (req, res) => {
     return res.status(201).json(newPerson);
 });
 
+routes.put('/talker/:id', 
+middlewares.tokenValidation, 
+middlewares.nameValidation,
+middlewares.ageValidation,
+middlewares.talkValidation,
+middlewares.watchetAtValidation,
+middlewares.rateValidation,
+async (request, response) => {
+    const { id } = request.params;
+    const getId = +id;
+    const { name, age, talk: { watchedAt, rate } } = request.body;
+    const talker = await readTalker();
+    const otherUsers = talker.filter((u) => u.id !== +id);
+    await fs.writeFile('./talker.json',
+    JSON.stringify([...otherUsers, { name, age, id: getId, talk: { watchedAt, rate } }]));
+    return response.status(200).json({ name, age, id: getId, talk: { watchedAt, rate } });
+});
+
+routes.delete('/talker/:id', 
+middlewares.tokenValidation, 
+async (request, response) => {
+    const { id } = request.params;
+    const talker = await readTalker();
+    const otherUsers = talker.filter((u) => u.id !== +id);
+    await fs.writeFile('./talker.json',
+    JSON.stringify(otherUsers));
+    return response.status(204).end();
+});
+
 routes.use(middlewares.errorHandler);
 
 module.exports = routes;
